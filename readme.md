@@ -177,3 +177,54 @@ Our replication can start at the complete 3D meshes themselves. We then use open
 - iAT-inducing locations have higher ICL% compared to iAT-free locations. More pronounced fractionation and slow conductance are more likely to develop re-entrant circuits leading to iAT.
 
 
+## openCARP workflow
+
+openCARP is an FEM simulator written in C++. carputils is a python package that allows the user to set up a simulation in python. A carputils python script essentially gathers all the simulation parameters into a string and feeds it into the openCARP C++ executable.
+
+In the carputils script:
+
+1. Define the mesh
+
+2. Define the ionic models & conductivities in a list
+
+    `["parameter1", value, "parameter2", value, ... ]`
+
+3. Define the stimulation
+
+4. Define the simulation options
+  - the source model
+  - time resolution
+  - I/O options
+    - -spacedt = how often to write output to file
+    - -timedt = how often to display output to terminal
+
+5. Combine all the above into a big string var `cmd` to be passed to openCARP
+
+6. Add optional visualization command
+
+7. Add `job.carp(cmd)`
+
+Once simulation is finished, it will output some files that can be opened with meshanalyzer to visualize the 3d simulation. Meshanalyzer has a bunch of utilities that allow you to probe the simulation results. For example, you can select specific vertices in the 3d mesh and see the voltage over time on a plot.
+
+  - .pds file: the 3d mesh generated 
+  - .igb file: the simulation results that can be overlayed onto 3d mesh
+
+## Development strategy
+
+### Running simulations
+
+- Set up openCARP docker container on wine. Mount a directory of our custom python/carputils scripts
+- Run the simulations in the openCARP docker container
+
+### Visualization
+
+#### Option 1
+- Set up X11 server on local machine
+- Configure SSH for X11 forwarding
+- Run openCARP docker container with display option and mounting X11 unix socket to container
+
+#### Option 2
+- Set up openCARP tools locally
+- Run simulations in openCARP docker container on Wine
+- scp results to local machine
+- visualize on local machine with local openCARP tools
